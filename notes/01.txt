@@ -1,5 +1,6 @@
-INTRO TO OS
------------
+------------------------------------
+THREE EASY PIECES CH 2: INTRO TO OS
+------------------------------------
 
 An operating system is a body of software that makes it easy to run programs, letting programs share memory, letting them interact with devices, etc.
 Also called VIRTUAL MACHINE because transforms physical resource into general, power, and easy to use virtual form of itself.
@@ -30,3 +31,66 @@ SYSTEM CALL --> special instruction called a TRAP where hardware transfers contr
 
 MULTIPROGRAMMING = multiple jobs run on OS which would switch rapidly between them and utilize cpu better 
 
+-----------------------------
+OPERATING SYSTEMS PRINCIPLES
+-----------------------------
+http://htmlpreview.github.io/?https://github.com/markkampe/Operating-Systems-Reading/blob/master/principles.html
+
+Complexity Management
+- Heirarchal decomposition (layers) = decomposing system in top-down way 
+    - enable us to understand a group without understaning internal structure of subgroups that comprise it 
+    - try to stick to "tree" pattern but not always possible, there will be non-Heirarchal communication we try to minimize
+- Modularity and functional encapsulation
+    - MODULE = component where it is possible to understand it and use its funcitons without understanding its internal structure
+        - implementation details are ENCAPSULATED in that module
+        - MODULAR system = all of the system's components satisfy this
+    - Good to:
+        - have smaller and simpler components
+        - combine closely related functionality into single module
+        - COHESION = smallest possible modules consisted w/ the co-location of closely related funcitonality 
+            "degree to which the elements inside a module belong together"
+            "strength of relationship between the methods and data of a class and some unifying purpose or concept served by that class"
+    - Component responsibilities should be designed to well compartmentalize operations within that component 
+- Abstract interfaces, hide information
+    - appropriate abstraction = interface that lets client specify parameters most meaningful to them and easily get desired results 
+    - opaque interface = does not reveal underlying implementation, hides information from clients who don't want to understand 
+        - also increases developer's flexibility to change interface in the future
+- Powerful abstractions 
+    - gives us tools to undersatnd, oragnize and control systems that are otherwise very complex 
+    - paradigms to help undersatnd phenomena, architectures to model new solutions, mechanisms to visualize and construct solutions 
+- Interface contracts 
+    - make sure changes are compatible with programs that use the old and new version 
+    - components evelve independently
+- Progressive refinement
+    - Add new functionality in smaller projects
+    - Solve specific problems for users 
+    - Ship fast, get feedback, reiterate and pivot 
+
+Artchitectural paradigms 
+- Mechanism and policy separation -> make system versatile for many different use cases 
+    - MECHANISMS = keep track of resources and give/deny client access
+        - e.g. card keys, readers, locks, computer for card-key lock system
+    - POLICY = control which clients get which resources when 
+        - e.g. rules in access control database that can be configured to many different policies 
+- Indirection, federation, deferred binding
+    - Accommodate many implementations of similar functionality with plug-in modules that can be added to the system as needed 
+        - share common abstraction/interface
+        - accessed indirectly, not build into OS 
+        - FEDERATION FRAMEWORK achieves indirection by registering available implementations and letting clients choose implementation, then routes requests to selected implementation
+        - BINDING of client to implementation is deferred until client needs that resource -> can choose implementation at runtime, dynamically discovered, and dynamically loaded
+- Dynamic equilibrium 
+    - Hard to tune large complex systems -> DYNAMIC EQUILIBRIUM brings stability to complex natural system 
+    - Rseource allocation driven by opposing forces -> system is adaptable to change 
+- Data structures determine the algorithm because they tell us
+    - which operations are fast/slow
+    - which operations are simple/complex
+    - locking requirements for each operation 
+    - speed of error recovery 
+
+Life principles 
+- Everything comes at a cost. Often conflicting goals require compromise
+- Some cool idea probably won't work until you work out all the details 
+- Simplicity is best, don't cfix what's not broken 
+- Clearly understand higher level goals, don't get distracted with micro-goals 
+- Act responsibly, anticipate and deal with consequences of our actions
+    - Handle all errors, create complete solutions
