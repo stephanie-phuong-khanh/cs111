@@ -1,0 +1,32 @@
+INTRO TO OS
+-----------
+
+An operating system is a body of software that makes it easy to run programs, letting programs share memory, letting them interact with devices, etc.
+Also called VIRTUAL MACHINE because transforms physical resource into general, power, and easy to use virtual form of itself.
+Provides STANDARD LIBRARY to applications aka SYSTEM CALLS which are interfaces.
+Also a RESOURCE MANAGER to CPU, memory, disk, other resources
+
+VIRTUALIZING THE CPU = turning one CPU or few of them into seemingly infinite number of CPUs to allow multiple programs to seemingly run at once
+VIRTUALIZING MEMORY = each process accesses its own private VIRTUAL ADDRESS SPACE that the OS maps to physical memory, so two programs can "write to address 0x2000 if it wants
+
+THREAD = function running in same memory space as other functions, wiith more than one of them active at a time.
+ATOMICALLY = executed all at once
+    Increment counter = load value from memory to register, increment it, write back to memory --> not atomic
+
+PERSISTENCE = if data is lost when power goes away or system crashes (VOLATILE) like DRAM
+    Disk drives (I/O device and hard drives) and SSDs (SOLID STATE DRIVES) store data persistently 
+    FILE SYSTEM = software in OS that manages disk, stores FILES created by user; not virtualized because should be shared across programs.
+
+High PERFORMANCE and MINIMIZE OVERHEADS
+PROTECTION between applications by ISOLATION of processes from one another
+RELIABLE because when OS fails, all applicaitons running on it fail too. 
+ENERGY EFFICIENT
+SECURITY
+MOBILITY because OS's are now run on smaller devices 
+
+Usually program run in USER MODE = hardware resricts what application can do 
+SYSTEM CALL --> special instruction called a TRAP where hardware transfers control to pre-specified TRAP HANDLER and raises privilege to KERNEL MODE where OS has full access to hardware of the system 
+    OS finishes -> pass control back to user via RETURN FROM TRAP instruction which goes back to user mode and passes control back to where application left off 
+
+MULTIPROGRAMMING = multiple jobs run on OS which would switch rapidly between them and utilize cpu better 
+

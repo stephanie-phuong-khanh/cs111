@@ -1,0 +1,33 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+INCLUDED FILES
+- lab0.c: source code for module that does file redirection, causes segfault, handles signal, or copies input to output as specified by arguments passed to program
+- Makefile: contains targets to compile lab0 program, create tarball, clean files produced by these commands, and run smoke test cases I wrote
+- backtrace.png: screenshot of gdb run when lab0 is run with --segfault flag, and the stack backtrace for it
+- breakpoint.png: screenshot of gdb run with `./lab0 --segfault` again but with break point set at line in program that caused segfault by bad assignment of null pointer
+- README: this file
+
+SMOKE TEST CASES
+- file_redirection: runs lab0 with valid --input and --output flags, checks if contents of input file matche those of output file that was created and written to
+- segfault: runs lab0 with --segfault flag, checks that return code is 139 as expected for SIGSEGV
+- catch: runs lab0 with --segfault and --catch flags, checks that return code is 4
+- invalid_argument: runs lab0 with flag --invalid_argument, checks that return code is 1
+- invalid_input_file: runs lab0 with nonexistent file name as argument to --input flag, checks that return code is 2
+
+SOURCES
+- open(2): https://man7.org/linux/man-pages/man2/open.2.html
+- creat(2): https://man7.org/linux/man-pages/man2/creat.2.html
+- close(2): https://man7.org/linux/man-pages/man2/close.2.html
+- dup(2): https://man7.org/linux/man-pages/man2/dup.2.html
+- read(2): https://man7.org/linux/man-pages//man2/read.2.html
+- write(2): https://www.man7.org/linux/man-pages/man2/write.2.html
+- exit(2): https://linux.die.net/man/2/exit
+- signal(2): https://man7.org/linux/man-pages/man2/signal.2.html
+- error codes: https://www.student.cs.uwaterloo.ca/~cs136/seashell/docs/seashell-error-codes.html
+- strerror(3): https://man7.org/linux/man-pages/man3/strerror.3.html
+- getopt(3): https://man7.org/linux/man-pages/man3/getopt.3.html
+- tar(1): https://man7.org/linux/man-pages/man1/tar.1.html
+- gdb(1): https://man7.org/linux/man-pages/man1/gdb.1.html
+- file descriptor management (linked html file): https://lasr.cs.ucla.edu/classes/111_fall16/labs/file_descriptors.html
