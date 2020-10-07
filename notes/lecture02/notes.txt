@@ -1,0 +1,106 @@
+------------------------
+LECTURE 2: Tuesday 10/06
+------------------------
+
+OS services are offered as abstractions in basic categories:
+- CPU/memory abstractions   
+    - CPU: processes, threads, VMs - actively execute code 
+    - memory: virtual address sapces, shared segments 
+- Persistent storage abstractions 
+    - Files and file systems 
+- Other I/O abstractions 
+    - Virtual terminal sections, windows 
+    - Sockets, pipes, VPNs, signals, (as interrupts)
+- Cooperating parallel processes   
+    - locks, condition variables 
+    - distributed transactions, leases 
+- Security 
+- UI
+
+(not directly visible to users)
+- Enclosure management 
+    - Hot-plug, power, fans, fault handling 
+- Software updates and configuration registry 
+- Dynamic resource allocation and scheduling 
+    - CPU, memory, bus resources, disk, network 
+- Networks, protocols, domain services 
+    - USB, BlueTooth 
+    - TCP/IP, DHCP, LDAP, SNMP
+    - iSCISI, CIFS, NFS 
+
+How to tell the OS to deliver these services?
+- Several options that each work at different layers of the sw stack
+    (1) Applications call subroutines 
+    (2) Applications make system calls 
+    (3) Applications could send messages to software that performs the services 
+
+OS Layering - layers of sw and hw
+- High level abstract services offered at high level software layers 
+- Lower level abstract services offered deeper in the OS 
+- Ultimately, everything mapped down to relatively simple hardware 
+
+[SEE IMAGE: layer.png]  
+    Application binary interface: everything on top must meet this interface 
+    Middleware: useful high level abstractions 
+
+(1) Service delivery via SUBROUTINE CALLS
+- push parameters, jump to subroutine, return values in registers on the stack 
+- typically at high layers 
+- Advantages
+    - very fast (nano-seconds)
+    - run-time implementation binding possible 
+- Disadvantages
+    - all services are implemented in same address space 
+    - limited ability to combine different languages 
+    - can't usually use privilged instructions 
+
+Service delivery via libraries 
+- one subroutine service delivery approach 
+- programmers dont need to write all code for programs - standard utility functions are found in libraries 
+- a library is a collection of object modules: 
+    - single file that contains many files (like zip or jar)
+    - these modules can be used directly without recompilation 
+- Most systems come with many standard libraries
+    - system services, encryption, statistics, etc.
+    - additional libraries may come with add-on products 
+- Programmers can build their own libraries 
+    - functions commonly needed by parts of a product 
+- [SEE IMAGE: layer.png] general libraries are compiled binaries 
+- Advantages
+    - reusable code -> easier programming
+    - well written and maintained 
+    - encapsulates complexity -> better building spots 
+- Multiple bind-time options 
+    - static - include in load module at link time 
+    - shared - map into address space at exec time (no need to have copies of same library)
+        - at link time, say: it's a shared program, we'll access it later 
+    - dynamic - choose and load at run time 
+- It's only code, it has no special privileges 
+
+*   compile -> link (here have machine language) -> load -> run 
+    C -> assembly -> machine language (what the CPU can actually run)
+
+Sharing libraries 
+- Static library modules are added to a program's load module 
+    - Each load module has its own copy of each library -> dramatically increases size of each process 
+    - Prgram must be re-linked to incorporate new library - existing load modules don't benefit form bug fixes
+- Instead, make each library a sharable code segment 
+    - One in-memory copy, shared by all processes 
+    - Keep the library separate from the load modules 
+    - OS loads library along with the program 
+- Advantages of shared libraries 
+    - Reduced memory consumption 
+    - Faster program startups because no need to load again 
+    - Simplified udpates
+- Limitations 
+    - Not all modules will work in a shared library - cannot define/include global data storage 
+    - Added into program memory whether they are actually needed or not 
+    - Called routines must be known at compile time: 
+        - Only the fetching of the code is delayed 'til run-time
+        – Symbols known at compile time, bound at link time
+    - Dynamically Loadable Libraries are more general
+        – They eliminate all of these limitations ... at a price
+
+[SEE IMAGE: libraries.png]
+
+

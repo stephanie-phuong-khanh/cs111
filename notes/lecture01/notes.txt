@@ -1,0 +1,303 @@
+------------------------------------
+THREE EASY PIECES CH 2: INTRO TO OS
+------------------------------------
+
+An operating system is a body of software that makes it easy to run programs, letting programs share memory, letting them interact with devices, etc.
+Also called VIRTUAL MACHINE because transforms physical resource into general, power, and easy to use virtual form of itself.
+Provides STANDARD LIBRARY to applications aka SYSTEM CALLS which are interfaces.
+Also a RESOURCE MANAGER to CPU, memory, disk, other resources
+
+VIRTUALIZING THE CPU = turning one CPU or few of them into seemingly infinite number of CPUs to allow multiple programs to seemingly run at once
+VIRTUALIZING MEMORY = each process accesses its own private VIRTUAL ADDRESS SPACE that the OS maps to physical memory, so two programs can "write to address 0x2000 if it wants
+
+THREAD = function running in same memory space as other functions, wiith more than one of them active at a time.
+ATOMICALLY = executed all at once
+    Increment counter = load value from memory to register, increment it, write back to memory --> not atomic
+
+PERSISTENCE = if data is lost when power goes away or system crashes (VOLATILE) like DRAM
+    Disk drives (I/O device and hard drives) and SSDs (SOLID STATE DRIVES) store data persistently 
+    FILE SYSTEM = software in OS that manages disk, stores FILES created by user; not virtualized because should be shared across programs.
+
+High PERFORMANCE and MINIMIZE OVERHEADS
+PROTECTION between applications by ISOLATION of processes from one another
+RELIABLE because when OS fails, all applicaitons running on it fail too. 
+ENERGY EFFICIENT
+SECURITY
+MOBILITY because OS's are now run on smaller devices 
+
+Usually program run in USER MODE = hardware resricts what application can do 
+SYSTEM CALL --> special instruction called a TRAP where hardware transfers control to pre-specified TRAP HANDLER and raises privilege to KERNEL MODE where OS has full access to hardware of the system 
+    OS finishes -> pass control back to user via RETURN FROM TRAP instruction which goes back to user mode and passes control back to where application left off 
+
+MULTIPROGRAMMING = multiple jobs run on OS which would switch rapidly between them and utilize cpu better 
+
+-----------------------------
+OPERATING SYSTEMS PRINCIPLES
+-----------------------------
+http://htmlpreview.github.io/?https://github.com/markkampe/Operating-Systems-Reading/blob/master/principles.html
+
+Complexity Management
+- Heirarchal decomposition (layers) = decomposing system in top-down way 
+    - enable us to understand a group without understaning internal structure of subgroups that comprise it 
+    - try to stick to "tree" pattern but not always possible, there will be non-Heirarchal communication we try to minimize
+- Modularity and functional encapsulation
+    - MODULE = component where it is possible to understand it and use its funcitons without understanding its internal structure
+        - implementation details are ENCAPSULATED in that module
+        - MODULAR system = all of the system's components satisfy this
+    - Good to:
+        - have smaller and simpler components
+        - combine closely related functionality into single module
+        - COHESION = smallest possible modules consisted w/ the co-location of closely related funcitonality 
+            "degree to which the elements inside a module belong together"
+            "strength of relationship between the methods and data of a class and some unifying purpose or concept served by that class"
+    - Component responsibilities should be designed to well compartmentalize operations within that component 
+- Abstract interfaces, hide information
+    - appropriate abstraction = interface that lets client specify parameters most meaningful to them and easily get desired results 
+    - opaque interface = does not reveal underlying implementation, hides information from clients who don't want to understand 
+        - also increases developer's flexibility to change interface in the future
+- Powerful abstractions 
+    - gives us tools to undersatnd, oragnize and control systems that are otherwise very complex 
+    - paradigms to help undersatnd phenomena, architectures to model new solutions, mechanisms to visualize and construct solutions 
+- Interface contracts 
+    - make sure changes are compatible with programs that use the old and new version 
+    - components evelve independently
+- Progressive refinement
+    - Add new functionality in smaller projects
+    - Solve specific problems for users 
+    - Ship fast, get feedback, reiterate and pivot 
+
+Artchitectural paradigms 
+- Mechanism and policy separation -> make system versatile for many different use cases 
+    - MECHANISMS = implements basic operation to do thing
+        - keep track of resources and give/deny client access
+        - e.g. card keys, readers, locks, computer for card-key lock system
+        - shouldn't control or limit policies
+    - POLICY = what can/should be done 
+        - control which clients get which resources when 
+        - e.g. rules in access control database that can be configured to many different policies 
+        - must be changeable without changing mechanisms
+- Indirection, federation, deferred binding
+    - Accommodate many implementations of similar functionality with plug-in modules that can be added to the system as needed 
+        - share common abstraction/interface
+        - accessed indirectly, not build into OS 
+        - FEDERATION FRAMEWORK achieves indirection by registering available implementations and letting clients choose implementation, then routes requests to selected implementation
+        - BINDING of client to implementation is deferred until client needs that resource -> can choose implementation at runtime, dynamically discovered, and dynamically loaded
+- Dynamic equilibrium 
+    - Hard to tune large complex systems -> DYNAMIC EQUILIBRIUM brings stability to complex natural system 
+    - Rseource allocation driven by opposing forces -> system is adaptable to change 
+- Data structures determine the algorithm because they tell us
+    - which operations are fast/slow
+    - which operations are simple/complex
+    - locking requirements for each operation 
+    - speed of error recovery 
+
+Life principles 
+- Everything comes at a cost. Often conflicting goals require compromise
+    - parallelism and correctness are often at odds
+- Some cool idea probably won't work until you work out all the details 
+- Simplicity is best, don't cfix what's not broken 
+- Clearly understand higher level goals, don't get distracted with micro-goals 
+- Act responsibly, anticipate and deal with consequences of our actions
+    - Handle all errors, create complete solutions
+
+------------------------------------------
+LECTURE 1 (Thursday 10/01 & Tuesday 10/06)
+------------------------------------------
+An operating system is low level software that provides better abstractions of hardware below it, to allow easy, safe, fair use and sharing of these resources. 
+
+Manages hardware by allocating and managing it, enforcing controlled sharing/privacy, oversees execution and error hadnles 
+Abstracts hardware to make it usable and portable (program works on different machines) and performant
+New abstractions for applications -> More powerful than just hardware 
+
+Management + abstraction services
+Applications see objects and their services
+    CPU supports data types [bytes, shorts, longs, etc.] and operations [add, subtract, copy, etc.]
+    OS supports (higher level) data structures [files, processes, threads, etc.] and operations [create, destroy, read, write, etc.]
+
+Use system call when you want to use privieged instruction set. Want to do something private in OS -> must ask OS to do it. Mostly done by calling library that itself makes the system call. Or write assembly language. Application software cannot run a privileged instruction, will fail if it tries.
+
+---> week 1 (Tuesday 10/06)
+
+BIOS = firmware used to perform hardware initialization during the booting process
+The OS is control of the hardware.
+    Automatically loaded when machine boots 
+    First sw to have access to hardware 
+    Continues running when apps come and go 
+Has complete hardware access 
+    Privilged insn set, all of memory and I/O
+Mediates application interaction with hardware 
+Trusted 
+If OS crashes, everything else on machine crashes 
+
+Instruction set architecture (ISA)
+- Set of instructions supported by a computer (bit pattern -> operation)
+- Different ISAs 
+    - Different word/bus widths (8, 16, 32, 64, bit)
+    - Different features (low power, floating point, etc)
+    - Different design philosophies (RISC vs CISC - complex,powerful instructions)
+    - Competitive reasons (68000, x86, PowerPC)
+- Usually come in families - Newer models add features but remain upwards comptible with older models
+    - Families are versions 
+    - Software that can run on old version can run on new version (upgrade is a feature not a problem)
+    - If second machine has same architecture as first machine, OS can run on it. 
+
+Privilged vs General(standard) instruction set 
+- Most modern ISAs divide insns between these two types 
+- Any code running on the machine can execute any of the general instructions 
+- To execute Privilged instructions, processor must be put into a special mode 
+    - Only in that mode when the OS is running 
+    - Privilged insns do things that are "dangerous" in terms of (not) properly performing computations
+
+Platform = collection of all the hardware you have on computer; OS = software 
+- ISA doesn't completely define a computer 
+    - Funcitonality beyond user mode instructions  
+        - Interrupt controllers, DMA controllers
+        - Memory management unit, I/O busses 
+        - BIOS, configuration, diagnsotic features 
+        - Multi processor and interconnect support 
+    - I/O devices: display, disk, network, serial device controllers
+- Platform on which OS runs
+
+Portability to Multiple ISAs 
+- Successful OS will run on many ISAs 
+    - Some customers cannot choose their ISA 
+    - If you don't support it, you can't sell to them 
+- OS needs to abstract away the ISA 
+- Minimal assumptions about specific hardware 
+    - General frameworks are HW independent: file systems, protocols, processes, etc 
+    - HW assumptions isolated to specific moduels: context switching, I/O, memory management 
+        e.g. can't treat flash drive like rotating disk drive -> need software that treat these two differently 
+    - Careful use of types: word length, sign extension, byte order, alignment 
+-> How can an OS manufacturer distribute to all these different ISAs and platforms? 
+
+Use the BINARY DISTRIBUTION MODEL 
+- Binary code is the derivative of source 
+    - OS is written in source code (C)
+    - but source code needs to be compiled (machine language is specific to ISA)
+    - Binary distribution is ready to run (1 binary distribution for every ISA)
+- OSes usually distributed in binary 
+- One binary distribution per ISA
+- What about platform (different machines) problem? 
+    - Customize OS to fit the platform (e.g. behave according to amount of memory available)
+    - Binary model for platform support 
+        - Device drivers can be added after market, written/distirbuted by 3rd parties
+        - Same driver works with many versions of OS 
+
+Binary configuration model
+- Good to eliminate manual/static configuration
+    - Enable one distribution to serve all users 
+    - Improve both ease of use and performance 
+- Automatic hardware discovery (BIOS starts up OS, OS figures out what hardware we have)
+    - Self identifying busses
+        - Bus is HW device that connects all hardware (most important: CPU to RAM)
+    - Automatically find and load required drives
+- OS does automatic resource allocation 
+    - Eliminate fixed sized resource pools 
+    - Dynamically (re)allocate resources on demand 
+
+What funcitonality is in the OS?
+- As much as necessary, as little as possible 
+    - OS code is very expensive to develop and maintain 
+- Functionality must be in the OS if it..
+    - Needs to use privileged insturctions 
+    - Needs to manipulate OS data structures 
+    - Needs to maintain security, trust, resource integrity 
+- Functions should be libraries if they ...
+    - are a service commonly needed by applications 
+    - do not actually have to be implemented inside the OS 
+- But there is also the performance excuse since some things are faster if done in OS 
+    - Often, if something that doesn't have to be done in OS is moved into OS anyways
+
+OS and abstraction
+- Offers abstract versions of resources as opposed to actual physical resources 
+- OS implements abstract resources using physical resources 
+    - process (abstraction) are implemented with CPU and RAM (physical)
+    - files (abstraction) are implemented with disks (physical)
+
+Why abstract resources? 
+- Abstractions are simpler to use for programmers and users 
+    - Easier to use than the original resources
+    - Compartmentalize and encapsulate complexity 
+    - Eliminate behavior irrelevant to user - e.g. slow erase cycle of flash memory 
+    - Create more convenient behavior - make it seem like you have entire resource to yourself 
+
+General abstractions 
+- Many variations in machines' hardware and software 
+- Make many different types appear the same -> applications can deal with single common class 
+- Usually involves a common unifying model 
+    - portable document format (pdf) for printers 
+    - SCSI standard for disks, CDs and tapes 
+- e.g. printer drivers make different printers look the same; browser plug-ins to handle multi-media data 
+
+Common types of OS resources 
+(1) Serially reusable resources 
+    - used by multiple clients, but only one at a time (time multiplexing)
+    - require access control to ensure exclusive use 
+    - require graceful transitions from one user to the next 
+        - a switch taht totally hides the fact that the resource that used to belong to someone else 
+        - don't allow second user to access resource until first user is done (no incomplete ops that finish after the transition)
+        - make sure each subsequent user finds the resource in "like new" condition 
+    - e.g. printer, speakers, toilets
+(2) Partitionable resource
+    - divided into disjoint pieces for multiple clients - spacial multiplexing 
+    - needs access conrol to ensure: 
+        (a) Containment - you cannot access resources outside of your partition 
+        (b) Privacy - nobody else can access resources in your partition 
+    - e.g. RAM, hotel (rooms)
+    - Still need graceful transitions because partitionable resources mostly are not permanently allocated - the piece of RAM i'm using now will belong to anohter process later 
+        - as long as it's mine, no transition required 
+        - but sooner or later it's likely to become someone else's 
+    - CPU with multiple cores is partitionable resource, each core is serially reusable 
+(3) Shareable resources 
+    - Usable by multiple concurrent clients 
+        - Clients don't wait for access to resource
+        - Clients don't own a particular subset of the resource 
+    - may involve (effectively) limitless resources 
+        - Air in a room, shared by occupants 
+        - Copy of the OS, shared by processes (no separate copy of OS for each process)
+    - Do we still need graceful transitions? 
+        - Typically not 
+        - Shareable resource usually doesn't change state 
+        - or it isn't "reused"
+        - we never have to clean up what doesn't get dirty  (like execute-only copy of OS)
+        - design your system to maximize sharable resource!
+
+General OS trends 
+- They have grown larger and more sophisticated 
+- Their role has fundamentally changed 
+    - From shepherding the use of the hardware 
+    - To shielding the applications from the hardware 
+    - To provide powerful application computing platform 
+    - To become a sophisticated "traffic cop" 
+- They still sit between applications and hardware 
+- Best understood through services they provide 
+    - Capabilities they add 
+    - Applications they enable 
+    - Problems they eliminate 
+
+Why? 
+- It's what users want 
+- OS must provide core services to applications 
+- Applications have become more complex 
+    - More complex internal behvaior 
+    - More complex interfaces 
+    - More interactiosn with other software 
+- OS needs to help with all that complexity 
+
+OS convergence 
+- There are a handful of widely used OSes:
+    - Windows
+    - MacOS - built on UNIX 
+    - Linux 
+        - ChromeOS is linux
+- Special purpose ones 
+    - real time - control things in real world at particular schedule 
+    - embedded system - put OS in physical device for that device's function, not general computing 
+- OSes in the same fam are used for vastly different purposes 
+    - Challenging for OS designer 
+- Most OSes are based on pretty old models
+
+Conclusion: the OS ...
+- interacts directly with the hardware
+- provide services via abstractions
+- are constrained by many non-technical factors - business reasons for there being 3 main OSes 
