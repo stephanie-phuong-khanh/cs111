@@ -1,0 +1,28 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+INCLUDED FILES
+- lab1a.c: source code for multi-process telnet-like client and server program, with this version (stage A) supporting character-at-a-time full-duplex terminal I/O without --shell=program, and polled I/O with data passed between two processes with the --shell=program flag
+- Makefile: contains targets to compile lab1a, create tarball with these three listed files, and clean produced lab1a executable
+- README: this file
+
+SOURCES
+- termios(3): https://man7.org/linux/man-pages/man3/termios.3.html
+- tcgetattr(3): https://linux.die.net/man/3/tcgetattr
+- tcsetattr(3): https://linux.die.net/man/3/tcsetattr
+- atexit(3): https://www.man7.org/linux/man-pages/man3/atexit.3.html
+- read(2): https://man7.org/linux/man-pages//man2/read.2.html
+- write(2): https://www.man7.org/linux/man-pages/man2/write.2.html
+- exit(2): https://linux.die.net/man/2/exit
+- fork(2): https://www.man7.org/linux/man-pages/man2/fork.2.html
+- waitpid(2): https://linux.die.net/man/2/waitpid
+- exec(3): https://man7.org/linux/man-pages/man3/exec.3.html
+- pipe(2): https://man7.org/linux/man-pages/man2/pipe.2.html
+- kill(3): https://linux.die.net/man/3/kill
+- strerror(3): https://man7.org/linux/man-pages/man3/strerror.3.html
+- poll(2): https://man7.org/linux/man-pages/man2/poll.2.html
+- execl(3): https://linux.die.net/man/3/execl
+- polling example: https://pubs.opengroup.org/onlinepubs/009695399/functions/poll.html
+- dup2(2): https://linux.die.net/man/2/dup2
+- Discussion 1A week 2 slides created by TA Tengyu Liu
