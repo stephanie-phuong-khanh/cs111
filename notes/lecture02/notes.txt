@@ -386,3 +386,11 @@ Abstracitons + layering
     - Easy to build multiple services on a lower layer, e.g. multiple file systems on one disk 
     - Easy to use multiple underlying services to support a higher layer 
     - e.g. file system can have either a single disk or a RAID below it 
+- Higher level, more work 
+- Lower level, more control 
+
+Downside to layering 
+- Performance 
+- Expensive to change data structures/representations, extra insns 
+- Lower layer may limit when upper layer can do e.g. abstract network link may hide causes of packet losses
+

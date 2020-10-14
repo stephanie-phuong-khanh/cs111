@@ -1,0 +1,301 @@
+------------------------
+LECTURE 3: Tuesday 10/13
+------------------------
+
+What is a process? 
+- Type of interpreter 
+- Executing instance of a program 
+- Virtual private computer 
+- Process is an object 
+    - Characterized by its properties (state)
+    - Characterized by its operations 
+    - Not all OS objects are processes but processes are a central and vital OS object type 
+- The OS itself is NOT a process.
+
+What is a state? 
+- Mode or condition of being 
+- All persistent objects have state to distinguish from other objects & characterize object's current condition 
+- Contents of state depends on object
+    - Complex ops often mean complex state but representable as set of bits 
+    - Can save/restore bits of aggregate/total state 
+    - We can talk of a state subset 
+
+OS object state mostly managed by OS itself, not by user code 
+- Example of OS states 
+    - shceudling priority of a process
+    - current pointer into file 
+    - completion condition of I/O op 
+
+Process access spaces 
+- Set of memory addreses for each process to have reserved for its private use 
+    - Process's address space = all memory locations the process can address    
+- Modtern OSes pretend every process's address space can include all of memory (an illusion)
+
+Program vs process address space: this program after compilation 
+[SEE IMAGE: address_space.png]
+- Symbol table for debugging - gets rid of variable names, replace with numbers -> symbol table maps variable names to numbers 
+- Stack for running process
+
+Process address space layout 
+- All required memory elements for a process must be put somewhere in its address space 
+- Different memory elements 
+    - Code is not writable but must be executable 
+    - Stacks are readable and writable but not executable
+- Each OS has some strategy for where to put these process memory segments (stacks, libraries, shared code, private data, etc)
+
+Layout of UNIX (Linux us type of UNIX) processes in memory 
+|           |           |  |                      |  |          |
+|   CODE    |   DATA    |  | -> both grow here <- |  |  STACK   |
+|           |           |  |                      |  |          |
+0x00000000                                                      0xFFFFFFFF
+
+- code segments statically sized 
+- Data segment grows up, Stack segment grows down => Must not meet 
+
+Address sapce : code segments 
+- Load module = module of linkage editor 
+    - All external refs have been resolved 
+    - All modules combined into a few segments 
+- Code must be loaded into memory
+    – Instructions can only be run from RAM
+    – A code segment must be created
+    – Code must be read in from the load module
+    – Map segment into process’ address space
+- Code segments are read/execute only and sharable
+    – Many processes can use the same code segments
+
+Address sapce : data segments 
+- Data must also be initialized in address space 
+    - Process data segment must be created an mapped into process's address space 
+    - Initial contents must be copied from load module 
+    - BSS (block started by symbol) segments must be initialized to all zeroes 
+- Data segments 
+    - are read/write, process private 
+    - program can grow or shrink it (using sbrk system call)
+
+Process and stack frames 
+- Modern programming languages are stack based 
+- Each procedure call allocates a new stack frame for a function (one active stack frame per process = what funciton we are currently executing) 
+    - Storage for procedure local (vs global) variables 
+    - Storage for invocation parameters 
+    - Save and restore registers: popped off stack when call returns 
+- Most modern CPUs also have stack support - stack too must be preserved as part of process state 
+
+Address space : stack segment 
+- Size of stack depends on program activities 
+    - e.g. amount of local storage used by each routine
+    - Grows larger as calls nest more deeply - grows giant with recursion 
+    - After calls return, their stack frames can be recycled
+- OS manages process's stack segment 
+    - Stack segment created at same time as data segment 
+    - Some OSes allocate fixed sized stack at program load time
+    – Some dynamically extend stack as program needs it
+    - Child process has its own private stack segment but shares code segments if exec not called 
+- Stack segments are read/write and process private
+    - Usually not executable 
+
+Address sapce : libraries 
+- Static libraries are added to load module 
+    - Each load module has its own copy of each library 
+    - Program must be re-linked to get new version 
+- Shared libraries use less space 
+    - One in-memory copy, shared by all processes 
+    - Keep library separate from the load modules 
+    - OS loads library along with program
+    - Read and executable only - can't have variables  
+- Reduced memory use, faster program loads 
+- Easier and better library upgrades 
+
+Other process state 
+- Registers 
+    - General registers 
+    - Special purpose: program counter, processor status, stack pointer, frame pointer 
+- Process's own OS resources 
+    - Open files (tracks which files are open), current working directory, locks 
+- But also OS-related state info, not used by process itself - e.g. scheduling info 
+- OS needs some data structure to keep track of all this info 
+
+Process descriptor 
+- Basic OS data structure for dealing with processes 
+- Stores all info relevant to the process
+    - State to restore when process is dispatched 
+    - References to allocated resources 
+    - Info to support process ops 
+- Managed by OS 
+- Used for scheduling, security decisions, allocation issues 
+
+Linux Process Control Block (PCB)
+- Data structure used by Linux (and any unix based system) to handle processes 
+- This is an example of a process descriptor 
+- Unique process ID, state of process, address space info, etc. 
+    _____________
+    Process ID
+    _____________
+    State
+    _____________
+    Pointer 
+    _____________
+    Priority 
+    _____________
+    Program counter
+    _____________
+    CPU registers 
+    _____________
+    I/O info 
+    _____________
+    Accounting info 
+    _____________
+    etc. 
+    _____________
+
+Other process state
+- Not all process state is stored directly in process descriptor 
+- Other process state in several other places 
+    – Application execution state is on the stack and inregisters
+- Linux processes have supervisor-mode stack to retain state of in-progress system calls, to save state of an interrupt-preempted process
+- A lot of process state is stored in the other memory areas
+
+Where do processes come from?
+- Creatd by OS, use some method to initialize state, to set up program to run 
+- at request of other process, which specifies which program to run and other aspects of initial state 
+- Parent process = process that created your process
+- Child process = processes your process created 
+
+Creating a process descriptor = OS's masic per-process data structure 
+- new process needs new descriptor 
+- OS puts descriptors into process table to organize all currently active processes 
+    - One entry for each process in system 
+
+What else does new process need? 
+- address space hold all of segments it will need -> OS allocates memory for code, data and stack 
+- OS loads program code and data into new segments, initializes stack segment, sets up initial registers (PC, PS, SP)
+* Core = hardware that actually runs code, runs whatever code the PC points to 
+
+Choices for process creation 
+1. Start with blank process 
+    - No initial state or resource 
+    - Have some way of filling vital stuff, like code, program counter, etc. 
+    - Basic Windows approach
+    - System call that makes it needs some info:
+        - Everything needed to set up the process properly
+        – At the minimum, what code is to be run
+        – Generally a lot more than that
+2. Use calling process as template 
+    - Give new process the same stuff as the old one (parent)
+    - Include code, PC, etc. 
+    - Basic Unix/Linux approach
+
+Windows Process Creation
+- CreateProcess() syscall 
+- Flexible with many parameter options, with name and other info like env info, priorities, etc. 
+
+Process forking = how unix / linux creates processes 
+- clones existing parent process 
+- assume new child process is a lot like the old one 
+    - most likely to be true for some kinds of parallel programming 
+    - not so likely for more typical user computing 
+    - approach has advantages like easing creation of pipelines 
+
+What happens after a fork?
+- There are now two processes with different PIDs but otherwise mostly exactly the same 
+- program executes a fork -> now two programs with same code and PC 
+- Figure out which is which with PID == 0 (child) or != 0 (parent)
+
+[SEE IMAGE: fork_memory.png]
+- Data of child process: we need writes of parent and children to be independent -> ..
+
+Forking and copy on write 
+- If parent had big data area, setting up separate copy for child is expensive (fork is supposed to be cheap)
+- If neither parent nor child write to parent's data area, no copy needed
+- Copy on write = if one of them writes it, make copy and let process write the copy; other process keeps original 
+
+But a fork isn't what I usually want!
+- Sometimes you don't want another copy of the same process, you want process to do something entirely different, to get rid of data, state, stack, etc.
+-> exec()
+    - remake process with new code, Different set of other resources, different PC and stack
+    - usually called after you do a fork
+    - resets state, like open files 
+
+How does OS handle exec? 
+- Gets rid of child's old code by not pointing to it anymore 
+- Gets rid of stack and data areas, data is easy if you're using copy on write because all we have to do is change the pointer 
+- Must load brand new set of code for that process 
+- Must initialize child's stack, PC, other relevant control structure 
+    - To start a fresh program run for the child process 
+
+Destroying process 
+- Most processes terminate 
+    - All do, of course, when machine goes down, but most do some work and then exit before that 
+    - Other killed by OS or another process
+- When a process terminates, OS needs to clean it up 
+    - Gets rid of its resources aka recycle and free them for other purposes, e.g. RAM can be used by other processes 
+    - Allows for reclamation 
+
+What must OS do to terminate a process?
+- Reclaim any resources it may be holding
+    - memory
+    - locks 
+    - access to hw devices 
+- inform other processes that needs to know
+    - processes waiting for IPC 
+    - parent and maybe child processes 
+- remove process descriptors from process table, reclaim its memory 
+
+Running processes
+- Processes must execute code to do their job which means the OS must give them access to a processor core, but usually more processes than cores, e.g. 200 to 300 processes on a typical machine
+- Processes share cores 
+* Computer with more RAM runs faster -> more processes can have their needs met 
+    Core dump used to examine what happening in process when it died 
+
+Loading a process 
+- To run process on core, core's HW must be initialized to initial state or whatever process was the last time it ran 
+- Load core's registers 
+- Initialize stack and set stack poitner 
+- Set up any memory control strucutres 
+- Set up program counter 
+
+Running a process on OS 
+- Execution model: limited direct execution 
+- Most insns are executed directly by the process on the core without any OS intervention 
+- Some insns instead cause a trap to the OS - privileged insns that can only execute in superviser mode, where OS takes control and takes care of that insn request 
+
+Limited direct execution - minimize writing OS code 
+- CPU directly executes most app code, with occational traps for syscalls and timer interrupts for time sharing 
+- Max direct execution is always the goal
+    - Linux/Windows - user mode process 
+    - OS simulation - windows on Linux 
+    - for VMs 
+- Enter OS as seldom as possible. If you do, get back to application as quickly as possible 
+- Key to good system performance
+
+Exceptions = what happens when process can't or shouldn't run an instruction 
+- Some exceptions are routine, e.g. end of file, arithmetic overflow, conversion error
+    - Shoudl check for this afer each operation 
+- Some exceptions occur unpredictably 
+    - Segfault e.g. deref null 
+    - User abort (control C), hang up, power failure 
+    - These are asynchronous exceptions 
+- Many traps happen because something went wrong 
+- Can come from interrupts from timers 
+
+Asynchronous exceptions - unpredicable 
+- Programs can't check for them since we can't know when and if they happen 
+- Can have try/catch ops 
+- HW and OS support traps by catching exceptions and trasnfer control to the OS 
+    - Something happens in HW that causes exception 
+- OS also uses these for system calls = Requests from a program for OS services
+
+Using traps for system calls 
+- Made possible at processor design time, notOS design time 
+- Resereve privileged insns for system calls, defined by most ISAs 
+- Define system call linkage conventions 
+    - Call: r0 = system call number, r1 points to arguments 
+    - Return: r0 = return code, condition code indicates success/failure 
+- Prep arguments for system call 
+- Execute system call insns which causes an exception that traps to OS 
+- OS recognizes and preforms requested operation -> entering OS through point called a gate 
+- Returns to insn after system call 
+* for example, open is a library call that uses a system call that gets to the file 
+    all these library calls that use system calls uses a trap 
+* trap = stop executing in user mode, go into OS in privileged mode 
+    Trap of syscall vs Trap of exception - some differences
