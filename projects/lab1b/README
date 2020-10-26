@@ -1,0 +1,22 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+INCLUDED FILES
+- lab1b-client.c: source code for client program that takes as input characters from terminal, sends to connected server via TCP socket, and receives response to output to terminal
+- lab1b-server.c: source code for server program that receives characters from connected client, passes data to and from shell program executed by child process, and sends response back to client
+- Makefile: contains target to build client and server programs distinctly, both programs, tarball, and clean
+- README: this file
+
+SOURCES
+- setrlimit(2): https://linux.die.net/man/2/setrlimit
+- creat(2): https://man7.org/linux/man-pages/man2/creat.2.html
+- dprintf(3): https://linux.die.net/man/3/dprintf
+- zlib: https://www.zlib.net/zlib_how.html
+- socket(2): https://man7.org/linux/man-pages/man2/socket.2.html
+- gethostbyname(3): https://man7.org/linux/man-pages/man3/gethostbyname.3.html
+- sockaddr_in: https://www.gta.ufrj.br/ensino/eel878/sockets/sockaddr_inman.html
+- connect(2): https://man7.org/linux/man-pages/man2/connect.2.html
+- write(2): https://www.man7.org/linux/man-pages/man2/write.2.html
+- pipe(2): https://man7.org/linux/man-pages/man2/pipe.2.html
+- Discussion 1A week 3 slides created by TA Tengyu Liu

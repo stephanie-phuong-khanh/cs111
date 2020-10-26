@@ -1,0 +1,306 @@
+------------------------
+THE SCHEDULER
+------------------------
+
+What is scheduling? 
+- An OS has choices about what to do next 
+    - For a resource that can serve one client at at eim
+    - When there are multiple potential cients 
+    - Who gets to use the resource next and for how long? 
+- Scheduler makes these decisions 
+
+OS scheduling examples 
+- What job to run next on an idle core? How long to let it run?
+- What order to handle set of block requests for a flash drive? 
+- If multiple messages are to be sent over the network, in what order should they be sent? 
+- We will primarily consider scheduling processes
+
+How do we decide how to schedule? 
+- Generally, we choose goals we wish to achieve and design scheduling algo that is likely to achieve those goals 
+- Different scheduling algorithms try to optimize different quantities so we can change the algorithm to drastically change system behavior 
+
+Process queue
+- queue of processes ready to run 
+    - typically ordered queue based on whichever should run next 
+    - depends on scheduling algo
+- when time comes to schedule a new process, grab the first one on the process queue 
+- processes that are not ready to run either are not in that queue or are at the end or are ignored by scheduler
+
+Potential scheduling goals
+- Maximize throughput, get as much work done as possible
+- Minimize average waiting time, try to avoid delaying too many for too long 
+- Ensure some degree of fairness, like minimize worst case waiting time 
+- Meet explicit priority goals, like tagging itmes with relative priority 
+- Real time scheudling - scheduled items tagged with deadline to be next as specified by real world clock
+    - Early deadlines higher in queue, later deadlines lower 
+
+Dif systems, dif scheduling goals 
+- How should we schedule our cores? 
+- Time sharing: 
+    - faster response time to interactive programs
+    - each user gets an equal share of the CPU 
+- Batch: 
+    - maximize total system throughput
+    - delays of individual processes are unimportant 
+- Real-time: 
+    - critical ops must happen on time
+    - non critical ops may not happen at all 
+- Service level agreement (SLA)
+    - make sure all agreements are met 
+    - various agreements may differ in details 
+
+Preemptive vs non-preemptive scheduling 
+- When we schedule a piece of work, we could let it use the resource until it finishes, or we could interrupt it part way through to allow other pieces of work to run instead 
+- If scheudled work always runs to completion, the scheduler is non-preemptive.
+- If the scheduler temporarily halts running work to run something else, it’s preemptive
+
+Pros and cons of non-preemptive (goes to completion) scheduling
++ low scheduling overhead 
++ high throughput 
++ conceptually very simple 
+- poor response time for processes, because if someone is currenlty running on the cpu core, you can't throw him off till he's done 
+- bugs can cause machines to freeze up like infinite loop 
+- bad fairness 
+- can make real time and priority scheduling hard 
+
+Pros and cons of preemptive 
++ good response time, can guarantee that a process will run at least for a little and doesn't have to wait forever 
++ fair usage 
++ good for real time and priority
+- complex 
+- needs to cleanly halt procss and save its state 
+- can have bad throughput 
+- possibly higher overhead 
+
+Scheduling: policy and mechanism 
+- The scheduler will move jobs onto and off of a processor core - dispatching 
+    - Requiring various mechanisms to do so 
+    - Part of scheduling mechanism 
+- Hww dispatching is done should not depend on policy used to decide who to dispatch 
+- Desirable to separate choice of who runs (policy) from the dispatching mechanism 
+    - Also desirable that OS process queue structure not be policy-dependent 
+    
+Scheduling the CPU 
+[SEE IMAGE: scheduling_cpu.png]
+
+Scheduling and performance 
+- How to schedule important system activities majorly affects performance which has different aspects 
+- Scheduling perofrmance has very different characteristics under light vs heavy load 
+- Important to understand the performance basics regarding scheduling
+
+General comments on performance 
+- Should be quantitative and measurable 
+- Metrics need units and the way we measure it 
+    - Choose a characteristic to be measured: must correlate well with goodness/badness of service 
+    - Find unit to quanitify that characteristic: must be unit that can be measured 
+    - Define process for measuring characteristic 
+
+How should we quantify scheduler performance?
+- Candidate metric: throughput (processes/second)
+    - But different processes need different run times 
+    - Process completion time not controlled by scheduler, so it can't figure out how to maximize this metric 
+- Candidate metric: delay (milliseconds)
+    - What delay tho? time to finish job (turnaround)? time to get some response? 
+    - Some delays are not the scheduler's fault
+        - Time to complete a service request 
+        - Time to wait for a busy resource 
+- Mean time to completion (seconds)
+    – For a particular job mix (benchmark)
+- Throughput (operations per second)
+    – For a particular activity or job mix (benchmark)
+- Mean response time (milliseconds)
+     Time spent on the ready queue
+- Overall “goodness”
+    – Requires a customer-specific weighting function
+    – Often stated in Service Level Agreements (SLAs)
+
+An Example – Measuring CPU Scheduling
+- Process execution can be divided into phases
+    – Time spent running - the process controls how long it needs to run
+    - Time spent waiting for resources or completions - resource managers control how long these take
+    – Time spent waiting to be run when ready - controlled by the scheduler
+- Proposed metric: Time that “ready” processes spend waiting for the CPU
+
+* load = work given to system 
+    throughput = work that gets through system 
+
+Why don't we archive ideal throughput? 
+- Scheduling is not free 
+    - It takes time to dispatch a process (overhead)
+    - More dispatches means more overhead (lost time)
+    - Less time (per second) is avilable to run processes 
+- How to minimize performance gap 
+    - Reduce overhead per dispatch 
+    - Minimize number of dispatches (per second)
+- This phenomenon is seen in many areas besides process scheduling 
+
+Why does response time explode? 
+- Real systems have finite limits, such as queue size 
+- When limits exceeded, requests are typically dropped -> infinite response time for them 
+    - There can be automatic retries like TCP but they could also be dropped 
+- If load arrives faster than it is serviced, lots gets dropped 
+-> Overhead can explode during periods of heavy load 
+
+Graceful degradation 
+- When is a system overloaded? When it is no longer able to meet its service goals. 
+- What do we do when overload?
+    - Continue service but with degraded performance 
+    - Maintain perf by rejecting work 
+    - Resume normal service when load drops to normal 
+- What should we not do? 
+    - Allow throughput to drop to zero, should always be doing work 
+    - Allow response time to grow without limit 
+
+Non-preemptive scheduling - process runs until it yields CPU 
+- Works for simple systems with few processes and natural producer consumer relationsihps 
+- Good for maximizing throughput 
+- Depends on each process to voluntarily yield 
+    - A piggy process can starve others 
+    - A buggy process can lock up the entire system 
+- Algorithms...
+
+(1) First come first serve
+- simple af 
+- run first process on ready queue until it completes or yields -> run next on queue 
+- highly variable delays, depending on process implementations 
+- all will be served eventually with no infinite loop 
+- good for when response time not important, need to minimize overhead more than single job's completion time (e.g. expensive hardware), embedded systems (brief computations or producer/consumer)
+
+(2) Real time schedulers 
+- some things must happen at particular times, e.g. industrial control systems 
+- schedule on basis of real-time deadlines 
+- can either be hard or soft 
+
+Hard real time schedulers 
+- System absolutely must meet its deadilnes 
+- By definition, system fails if deadline is not met e.g. controlling a nuclear power plant 
+- How can we ensure no missed deadlines? Usually by careful analysis that no deadlines are missed, planning ahead and working before deadline, rigorously enforces deadlines 
+    - Need to really undersatnd code and how long it'll take 
+    - Need to avoid non-deterministic timings even if it speeds things up, super fucked if slows them down 
+    - Often means u gotta turn off interrupts 
+    - Scheduler is non-preemptive 
+    - Set up pre-defined schedule 
+
+Soft real time schedulers 
+- Cool to meet deadlines but tbh it's chill 
+- Can have dif classes of deadline urgency 
+- Less analysis needed 
+
+If don't meet deadline ...
+- Might drop job whose deadline you missed 
+- Might let system fall behind 
+- Might drop anohter job in future 
+
+Algo for soft real time? 
+- commonly used is Earliest Deadline First  
+    - each job has deadline associated with it based on common clock 
+    - keep job queue sorted by deadlines 
+    - whenever one job completes, pick first one off the queue 
+    - prune queue to remove missed deadlines 
+    - goal: minimize total lateness
+
+Example of soft real time scheduler 
+- video playing device 
+- frames arrive from disk or network or camera or wherever 
+- ideally each frame is rendered "on-time" but if you can't render a frame on time, might be better to skip entirely 
+- need to achieve highest user-perceived quality 
+
+Preemptive scheduling 
+- Thread or process is chosen to run until either it yields or OS decides to interrupt it 
+- At that point, another process/thread runs it
+- Interrupted process/thread is restarted later 
+
+Implicates of forcing preemption 
+- A process can be forced to yield at any time if:
+    - A more important process becomes ready, e.g. from I/O completion interrupt 
+    - Running process's importance is lowered, maybe as result of having run for too long 
+- Interrupted process might not be in a clean state which could complicate saving and restoring its state 
+- Enables forced "fair share" scheduling 
+- Introduces gratuitous context switches, not required by dynamics of processes 
+- Creates potential resource sharing problems 
+
+Implementing preemption
+- How to get control away from a process? 
+- Consult scheduler before returning to process? 
+    - Has any ready process had its priority raised?
+    - Has any process been awakened?
+    - Has current process had its priority lowered?
+- Scheduler finds highest priority ready process 
+    - If current process, return as usual 
+    - If not, yield on behalf of current process and switch to higher priority process 
+
+Clock interrupts 
+- Modern processors contain a clock 
+- Peripheral device with limited powers 
+- Can generate an interrupt at a fixed time interval which temporarly halts any running process 
+- Good way to ensure that a runaway process doesn't keep control forever 
+- Key technology for preemptive scheduling 
+
+Round robin scheduling algo 
+- Goal: fair share scheduling 
+    - All processes given equal shares of CPU, must wait same time 
+- All processes assigned nominal time slice (might not use up entire time) - same sized slice for all processes 
+- Each process scheduled in turn to run until it blocks/expires -> put at end of queue 
+- Then next process is run until every process reaches front of queue  
+- All processes get pretty quick chance to do computation at cost of not finishing any process quickly, which is nice for interactive processes (serving human being)
+- More context switches which can be expensive 
+- Runaway processes do relatively little harm, only take 1/nth of overall cycles 
+- I/O interrupt 
+    - processes get stopped by round robin scheduling if their time slice expires 
+    - If they block for I/O or anything else, then scheduler doesn't halt them, they halt themselves 
+    - Thus, some percentage of the time round robin acts no differently than FIFO, when I/O occurs in a process and it blocks
+
+RR vs FIFO 
+- ??
+
+Choosing a time slice 
+- Performance of a preemptive scheduler heavily depends on how long the time slice is 
+- Long time slices -> avoid too many context switches, might waste cycles
+- Short -> better resposne time 
+
+Costs of a context switch 
+- OS takes interrupt, saves registers, calls scheduler 
+- Cycles to choose who to run (schedule/dispatcher chooses) 
+- Move OS context to new process (switch stack, non-resident process description)
+- Switch process address spaces - map-out old process, map-in new process 
+- Losing instruction and hw data caches, greatly slowing down the next hundred instructions 
+
+Priority scheduling algo (preemptive)
+- Sometimes processes aren't equally important -> prefer more important processes 
+- Assign each job priority number, maintiain a priority queue, run processes according to it 
+    - non-preemptive -> priority scheduling is just about ordering processes (shortest job first but ordered by priority)
+    - preemptive -> when new process is made, it might preempt a running process if its priority is higher 
+- Possible starvation -> can a low priority process ever run? If not, is that really what we want?
+    - So, we shoudl adjust priorities s.t. process that have run for a long time already have priority temporarily lowered, processes that haven' tbeen run much have priority temporailty raised 
+
+Hard priority vs soft priority 
+- Hard = higher priority has aboslute precedence over lower 
+- Soft = higher priority should get larger share of the resource than the lower 
+
+Priority scheduling in Linux is soft priority system 
+- Each process has priority = nice value -> describes share of CPU that a process should get 
+- Commands can be run to change process priorities 
+- Anyone can request lower priority for their process, privileged can request higher 
+
+Priority scheduling in Windows
+- 32 priority levels
+    - half regular tasks, half soft real time 
+    - real time scheduling requires special privileges 
+    - uses multi-queue approach 
+- Users can choose from 5 of these priority levels 
+- Kernel adjusts priorities based on process behavior -> Goal to improve responsiveness 
+
+Multi-level feedback queue (MLFQ) scheduling 
+- One time slice length may not fit all processes  
+- Make multiple ready queues 
+    - Short quantum (foreground) tasks that finish quickly (short by high priority time slices to optimize response time)
+    - Long quantum (background) tasks that run longer (low priority, to minimize overhead)
+        - e.g. long compilations 
+- Round robin within a queue 
+- How do i know what queue to put new process into?
+    - Start all processes in short quantum (high priority) queue, give standard cpu allocation, reduce its allocation everytime its run -> move to longer quantum (lower priority) queue after it uses its allocation 
+    - Periodically moves all processes to higher priority queue to avoid starvation 
+- Pros 
+    - Good response times for interactive jobs or other jobs with regular external inputs, won't be long before they're scheduled and won't waste CPU running for long time 
+    - Efficient but fair CPU use for non-interactive jobs -> run for long time w/o interrupt. If starved, will eventually get priority boost 
+    - Dynamic and automatic adjustment of scheudling based on actual behavior of jobs 

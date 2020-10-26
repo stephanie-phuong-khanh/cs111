@@ -299,3 +299,93 @@ Using traps for system calls
     all these library calls that use system calls uses a trap 
 * trap = stop executing in user mode, go into OS in privileged mode 
     Trap of syscall vs Trap of exception - some differences
+
+[SEE IMAGE: syscall_traps.png]
+
+Trap handling 
+- part sw,part hw 
+- hardware:
+    - trap makes it index into trap vector table for PC/PS 
+    - load new processor status word, switch to supervisor mode 
+    - push PC/PS of program that caused trap onto stack 
+    - load PC (w/ address of 1st level handler)
+- SW portion of trap handling 
+    - 1st level handler pushes all other registers 
+    - 1st level handler gathers info, selects 2nd level handler 
+    - 2nd level handler actually deals w/ problem: handles event kills process, return... 
+
+Traps and the stack 
+- Code to handle trap is just code, but run in privileged mode 
+- Requires stack to run on  since it might call many routines -> how does the OS provide it with necessary stack while not losing track of what the user process was doing or leaving sensitve data in user's stack area?
+
+Stacking and unstacking sys call - Have two stacks that both grow downwards
+1. User mode stack
+    - stack frames from applicaiton computaiton 
+    - resumed computation 
+2. Supervisor mode stack:
+    - user mode PC & PS 
+    - saved user mode registers 
+    - parameters to system call handler 
+    - return PC 
+    - system call handler stack frame 
+
+Returning to user mode 
+- Return is opposite of interrupt/trap entry 
+    – 2nd level handler returns to 1st level handler
+    - 1st level handler restores all registers from stack
+    – Use privileged return instruction to restore PC/PS
+    – Resume user-mode execution at next instruction
+- Saved registers can be changed before return
+    - Change stacked user r0 to reflect return code
+    – Change stacked user PS to reflect success/failure
+
+Asynchronous events 
+- Some tihngs are worth waiting for, e.g. when i read(), i wanna wait for the data 
+- Other time waiting doesn't make sense 
+    - i wanna do something else while waiting 
+    - i have multiple operaitons outstanding
+    - some events demand very prompt attention 
+- Need event completion call-backs, a common programming paradigm 
+    - computer supports interrupts (similar to traps)
+    - commonly associated with I/O devices and timers 
+
+User mode signal handling 
+- OS defines many types of signals: exceptions, operator actions, communication 
+- Processes can contorl their handling 
+    - Ignore signal 
+    - Designate handler for it 
+    - Default action, like kill or coredump process
+- Analogous to hardware traps/interrupts but implemented by OS and delivered to user mode processes 
+
+Managing process state 
+- A shared responsibility 
+- Process itself takes care of its own stack and contents of its memory 
+- OS keeps track of resources that have been allocated to the process 
+    - Which memory segments 
+    - open files and devies 
+    - supervisor stack 
+    - etc. 
+
+Blocked processes 
+- a process state element is whether a process is ready to run
+    - blocked = not ready to run
+- why might it not be ready to run? perhaps it's waiting for I/O or for some resource request to be satsified 
+- OS keeps track of whether a process is blocked
+- process descriptors (PCB in linux) to keep track of processes blocked state 
+
+Blocking and unblocking processes 
+- Why do we block processes? 
+    - Blocked/unblocked are notes to scheduler 
+    - So the scheduler knows not to choose them 
+    - And so other parts of OS know if they later need to unblock 
+- Any part of OS can set blocks, any part can remove them 
+    - And a process can ask to be blocked itself through a system call, but it better be sure that another process will unblock you. 
+
+Who handles blocking?  Resource manager 
+- When process needs an available resource? 
+    - Change process's scheduling state to blocked 
+    - Call scheduler and yield the CPU 
+- When required resource becomes available 
+    - Change process's scheduling state to ready 
+    - Notify scheduler that a change has occurred
+
