@@ -15,6 +15,3 @@ clean:
 
 dist:
 	tar -cvzf lab1b-604981556.tar.gz lab1b-client.c lab1b-server.c Makefile README
-
-check:	dist
-	./P1B_check.sh 604981556

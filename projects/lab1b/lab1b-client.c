@@ -162,12 +162,27 @@ void run_client(int socket_fd, int log_fd, int compress)
                     }
                 }
 
-                write(STDOUT_FILENO, cbuf, BUF_SIZE - socket_stream.avail_out);
+                uint8_t i;
+                for (i = 0; i < BUF_SIZE - socket_stream.avail_out; ++i)
+                {
+                    if (cbuf[i] == CR || cbuf[i] == LF)
+                        write(STDOUT_FILENO, &cr_lf, 2);
+                    else
+                        write(STDOUT_FILENO, &cbuf[i], 1);
+                }
+
                 deflateEnd(&socket_stream);
             }
             else
             {
-                write(STDOUT_FILENO, buf, bytes_read);
+                int i;
+                for (i = 0; i < bytes_read; ++i)
+                {
+                    if (buf[i] == CR || buf[i] == LF)
+                        write(STDOUT_FILENO, &cr_lf, 2);
+                    else
+                        write(STDOUT_FILENO, &buf[i], 1);
+                }
             }
 
             write_to_log(log_fd, "RECEIVED", buf, bytes_read);

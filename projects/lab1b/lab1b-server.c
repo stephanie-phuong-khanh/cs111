@@ -229,15 +229,7 @@ void run_server(char *program, int client_socket_fd, int compress)
                 }
                 else
                 {
-                    int i;
-                    for (i = 0; i < bytes_read; ++i)
-                    {
-                        if (buf[i] == CR || buf[i] == LF)
-                            write(client_socket_fd, &cr_lf, 2);
-                        else
-                            write(client_socket_fd, &buf[i], 1);
-                        ;
-                    }
+                    write(client_socket_fd, buf, bytes_read);
                 }
             }
 
