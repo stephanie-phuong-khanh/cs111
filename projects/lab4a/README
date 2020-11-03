@@ -1,0 +1,15 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+Beaglebone serial number:   BBGW17100670 
+MAC address:                2CF7F1066E46
+
+INCLUDED FILES
+- build_run.png: screenshot of build and run of simple program that prints "Hello world."
+- connected.png: screenshot of session showing Beaglebone's new name and its IP and MAC address with ifconfig 
+- copy.png: screenshot of simple hello world program copied from my laptop to the Beaglebone
+- git.png: screenshot of my cloned git repo and the listed directory
+- my_beaglebone.png: selfie of me holding my assembled Beaglebone
+- Makefile: includes targe tto build tarball with included files
+- README: this file
