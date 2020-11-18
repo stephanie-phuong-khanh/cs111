@@ -1,0 +1,198 @@
+Total: 1392 samples
+    1288  92.5%  92.5%     1392 100.0% thread_list
+      79   5.7%  98.2%       79   5.7% SortedList_lookup
+      25   1.8% 100.0%       25   1.8% SortedList_insert
+       0   0.0% 100.0%     1392 100.0% ?? /usr/src/debug////////glibc-2.17-c758a686/misc/../sysdeps/unix/sysv/linux/x86_64/clone.S:118
+       0   0.0% 100.0%     1392 100.0% start_thread
+
+
+ROUTINE ====================== thread_list in /u/eng/class/classste/cs111/lab2b/lab2_list.c
+  1288   1392 Total samples (flat / cumulative)
+     .      .   27:         fprintf(stderr, "%s\n", error_string);
+     .      .   28:     exit(exit_code);
+     .      .   29: }
+     .      .   30: 
+     .      .   31: void *thread_list(void *start_el)
+---
+     .      .   32: {
+     .      .   33:     // Insert list elements
+     .      .   34:     SortedListElement_t *start = (SortedListElement_t *)start_el;
+     .      .   35:     int i;
+     .      .   36:     for (i = 0; i < iterations; ++i)
+     .      .   37:     {
+     .      .   38:         if (opt_sync == 'm')
+     .      .   39:         {
+     .      .   40:             pthread_mutex_lock(&mutex);
+     .      .   41:             SortedList_insert(&list, start + i);
+     .      .   42:             pthread_mutex_unlock(&mutex);
+     .      .   43:         }
+     .      .   44:         else if (opt_sync == 's')
+     .      .   45:         {
+   708    708   46:             while (__sync_lock_test_and_set(&lock, 1))
+     .      .   47:                 ;
+     .     25   48:             SortedList_insert(&list, start + i);
+     .      .   49:             __sync_lock_release(&lock);
+     .      .   50:         }
+     .      .   51:         else
+     .      .   52:         {
+     .      .   53:             SortedList_insert(&list, start + i);
+     .      .   54:         }
+     .      .   55:     }
+     .      .   56: 
+     .      .   57:     // Get list length
+     .      .   58:     if (opt_sync == 'm')
+     .      .   59:     {
+     .      .   60:         pthread_mutex_lock(&mutex);
+     .      .   61:         SortedList_length(&list);
+     .      .   62:         pthread_mutex_unlock(&mutex);
+     .      .   63:     }
+     .      .   64:     else if (opt_sync == 's')
+     .      .   65:     {
+     .      .   66:         while (__sync_lock_test_and_set(&lock, 1))
+     .      .   67:             ;
+     .      .   68:         SortedList_length(&list);
+     .      .   69:         __sync_lock_release(&lock);
+     .      .   70:     }
+     .      .   71:     else
+     .      .   72:     {
+     .      .   73:         SortedList_length(&list);
+     .      .   74:     }
+     .      .   75: 
+     .      .   76:     // Look up and delete inserted keys
+     .      .   77:     SortedListElement_t *to_delete = NULL;
+     .      .   78:     for (i = 0; i < iterations; ++i)
+     .      .   79:     {
+     .      .   80:         if (opt_sync == 'm')
+     .      .   81:         {
+     .      .   82:             pthread_mutex_lock(&mutex);
+     .      .   83:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .   84:             if (!to_delete)
+     .      .   85:                 print_error("Key can not be found in list", -1, 2);
+     .      .   86:             if (1 == SortedList_delete(to_delete))
+     .      .   87:                 print_error("Failed to delete element from list", -1, 2);
+     .      .   88:             pthread_mutex_unlock(&mutex);
+     .      .   89:         }
+     .      .   90:         else if (opt_sync == 's')
+     .      .   91:         {
+   580    580   92:             while (__sync_lock_test_and_set(&lock, 1))
+     .      .   93:                 ;
+     .     79   94:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .   95:             if (!to_delete)
+     .      .   96:                 print_error("Key can not be found in list", -1, 2);
+     .      .   97:             if (1 == SortedList_delete(to_delete))
+     .      .   98:                 print_error("Failed to delete element from list", -1, 2);
+     .      .   99:             __sync_lock_release(&lock);
+     .      .  100:         }
+     .      .  101:         else
+     .      .  102:         {
+     .      .  103:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .  104:             if (!to_delete)
+     .      .  105:                 print_error("Key can not be found in list", -1, 2);
+     .      .  106:             if (1 == SortedList_delete(to_delete))
+     .      .  107:                 print_error("Failed to delete element from list", -1, 2);
+     .      .  108:         }
+     .      .  109:     }
+     .      .  110: 
+     .      .  111:     return NULL;
+     .      .  112: }
+---
+     .      .  113: 
+     .      .  114: int main(int argc, char *argv[])
+     .      .  115: {
+     .      .  116:     static struct option long_options[] = {
+     .      .  117:         {"threads", required_argument, 0, 't'},
+ROUTINE ====================== thread_list in /u/eng/class/classste/cs111/lab2b/lab2_list.c
+  1288   1392 Total samples (flat / cumulative)
+     .      .   27:         fprintf(stderr, "%s\n", error_string);
+     .      .   28:     exit(exit_code);
+     .      .   29: }
+     .      .   30: 
+     .      .   31: void *thread_list(void *start_el)
+---
+     .      .   32: {
+     .      .   33:     // Insert list elements
+     .      .   34:     SortedListElement_t *start = (SortedListElement_t *)start_el;
+     .      .   35:     int i;
+     .      .   36:     for (i = 0; i < iterations; ++i)
+     .      .   37:     {
+     .      .   38:         if (opt_sync == 'm')
+     .      .   39:         {
+     .      .   40:             pthread_mutex_lock(&mutex);
+     .      .   41:             SortedList_insert(&list, start + i);
+     .      .   42:             pthread_mutex_unlock(&mutex);
+     .      .   43:         }
+     .      .   44:         else if (opt_sync == 's')
+     .      .   45:         {
+   708    708   46:             while (__sync_lock_test_and_set(&lock, 1))
+     .      .   47:                 ;
+     .     25   48:             SortedList_insert(&list, start + i);
+     .      .   49:             __sync_lock_release(&lock);
+     .      .   50:         }
+     .      .   51:         else
+     .      .   52:         {
+     .      .   53:             SortedList_insert(&list, start + i);
+     .      .   54:         }
+     .      .   55:     }
+     .      .   56: 
+     .      .   57:     // Get list length
+     .      .   58:     if (opt_sync == 'm')
+     .      .   59:     {
+     .      .   60:         pthread_mutex_lock(&mutex);
+     .      .   61:         SortedList_length(&list);
+     .      .   62:         pthread_mutex_unlock(&mutex);
+     .      .   63:     }
+     .      .   64:     else if (opt_sync == 's')
+     .      .   65:     {
+     .      .   66:         while (__sync_lock_test_and_set(&lock, 1))
+     .      .   67:             ;
+     .      .   68:         SortedList_length(&list);
+     .      .   69:         __sync_lock_release(&lock);
+     .      .   70:     }
+     .      .   71:     else
+     .      .   72:     {
+     .      .   73:         SortedList_length(&list);
+     .      .   74:     }
+     .      .   75: 
+     .      .   76:     // Look up and delete inserted keys
+     .      .   77:     SortedListElement_t *to_delete = NULL;
+     .      .   78:     for (i = 0; i < iterations; ++i)
+     .      .   79:     {
+     .      .   80:         if (opt_sync == 'm')
+     .      .   81:         {
+     .      .   82:             pthread_mutex_lock(&mutex);
+     .      .   83:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .   84:             if (!to_delete)
+     .      .   85:                 print_error("Key can not be found in list", -1, 2);
+     .      .   86:             if (1 == SortedList_delete(to_delete))
+     .      .   87:                 print_error("Failed to delete element from list", -1, 2);
+     .      .   88:             pthread_mutex_unlock(&mutex);
+     .      .   89:         }
+     .      .   90:         else if (opt_sync == 's')
+     .      .   91:         {
+   580    580   92:             while (__sync_lock_test_and_set(&lock, 1))
+     .      .   93:                 ;
+     .     79   94:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .   95:             if (!to_delete)
+     .      .   96:                 print_error("Key can not be found in list", -1, 2);
+     .      .   97:             if (1 == SortedList_delete(to_delete))
+     .      .   98:                 print_error("Failed to delete element from list", -1, 2);
+     .      .   99:             __sync_lock_release(&lock);
+     .      .  100:         }
+     .      .  101:         else
+     .      .  102:         {
+     .      .  103:             to_delete = SortedList_lookup(&list, (start + i)->key); // line
+     .      .  104:             if (!to_delete)
+     .      .  105:                 print_error("Key can not be found in list", -1, 2);
+     .      .  106:             if (1 == SortedList_delete(to_delete))
+     .      .  107:                 print_error("Failed to delete element from list", -1, 2);
+     .      .  108:         }
+     .      .  109:     }
+     .      .  110: 
+     .      .  111:     return NULL;
+     .      .  112: }
+---
+     .      .  113: 
+     .      .  114: int main(int argc, char *argv[])
+     .      .  115: {
+     .      .  116:     static struct option long_options[] = {
+     .      .  117:         {"threads", required_argument, 0, 't'},

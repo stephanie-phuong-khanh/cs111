@@ -1,0 +1,44 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+INCLUDED FILES
+- lab2_list.c
+- SortedList.h 
+- SortedList.c
+- lab2b_list.csv 
+- lab2b_1.png: throughput vs. threads for mutex and spin-lock synchronization
+- lab2b_2.png: average mutex wait time and average time per operation for mutex-synchronized list operations
+- lab2b_3.png: successful iterations vs. threads
+- lab2b_4.png: throughput vs. number of threads for mutex synchronized partitioned lists
+- lab2b_5.png: throughput vs. number of threads for spin-lock synchronized partitioned lists
+- lab2_list.gp: gnuplot data reduction script for results
+- gen_data.sh: script to run test cases used in graphs. called by 'make test'
+- profile.out: execution profiling report of time spent in non-
+- Makefile 
+- README
+
+QUESTIONS
+2.3.1 - CPU time in the basic list implementation
+    Most of the CPU time in the 1 and 2-thread list tests are spent executing the actual list operations of insert, delete, and lookup-delete. These are the most expensieve parts of the code because with a low number of threads, each thread spends little time waiting for control of the lock and is able to execute actual list operations. In high-thread spin-lock tests, most of the CPU time is spent on context switches and waiting for control of the lock. The latter is true for spin locks, in which many clock cycles are spent waiting for control of the lock. Therefore, most of the CPU time is spent spinning for spin locks, but I believe most of the CPU time is still spent on list operations for mutex synchronized, because waiting threads are simply put to sleep so CPU cycles are not wasted on this.
+
+2.3.2 - Execution Profiling
+    The lines of code the consume most of the CPU time are two lines with the same code
+        while (__sync_lock_test_and_set(&lock, 1))
+    called in the thread_list function, when the thread is waiting to insert a single element into the list and to look up and delete an element from the list. This operation is expensive with many threads because many threads are waiting for control of the lock, and for spin locks the thread takes up CPU cycles spinning.
+
+2.3.3 - Mutex Wait Time
+    Teh average lock-wait time rise dramatically with thread count because since only one thread can run at once to perform the protected operations, the number of waiting threads and therefore time spent waiting scales with the thread count. 
+    The average time per operation rises less dramatically because this measurement also includes the list operations which are performed the same way regardless of the thread count, a more constant element that offsets the increased mutex wait time. 
+    The wait time per operation becomes greater than the completion time per operation because we cound the mutex wait time for each thread, which likely overlap in real time as multiple threads wait simultaneously. Wait time per operation simply counts the wall time from beginning to end of all list operations.
+
+2.3.4 - Performance of Partitioned Lists
+    As the number of lists increases, the throughput increases, meaning improving performance.
+    The throughput should increase until a certain point, which is where the number of lists is equal to the number of list elements to insert, which means each element is the head of its own one-element list, each thread can access the targeted element's list without waiting for control of the lock. Further increasing the number of lists would not make a difference, as the array of lists would just have empty spots without elements, as there are fewer elements than lists.
+    It should be likely that the throughput of an N-way partitioned list should be equivalent to the throughput of a single list with fewer (1/N threads). This pattern is roughly shown in the curves but should be confirmed with more data points.
+
+SOURCES
+- gperftools: https://github.com/gperftools/gperftools/releases
+- hash: https://stackoverflow.com/questions/8317508/hash-function-for-a-string
+- signal handler: https://www.tutorialspoint.com/c_standard_library/c_function_signal.htm
+- discussion 1A slides
