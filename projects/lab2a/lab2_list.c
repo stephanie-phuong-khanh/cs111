@@ -30,39 +30,81 @@ void print_error(char *error_string, int errnum, int exit_code)
 
 void *thread_list(void *start_el)
 {
-    if (opt_sync == 'm')
-        pthread_mutex_lock(&mutex);
-    if (opt_sync == 's')
-    {
-        while (__sync_lock_test_and_set(&lock, 1))
-            ;
-    }
-
     // Insert list elements
     SortedListElement_t *start = (SortedListElement_t *)start_el;
     int i;
     for (i = 0; i < iterations; ++i)
-        SortedList_insert(&list, start + i);
+    {
+        if (opt_sync == 'm')
+        {
+            pthread_mutex_lock(&mutex);
+            SortedList_insert(&list, start + i);
+            pthread_mutex_unlock(&mutex);
+        }
+        else if (opt_sync == 's')
+        {
+            while (__sync_lock_test_and_set(&lock, 1))
+                ;
+            SortedList_insert(&list, start + i);
+            __sync_lock_release(&lock);
+        }
+        else
+        {
+            SortedList_insert(&list, start + i);
+        }
+    }
 
     // Get list length
-    if (iterations != SortedList_length(&list))
-        print_error("Incorrect number of elements inserted into list", -1, 2);
+    if (opt_sync == 'm')
+    {
+        pthread_mutex_lock(&mutex);
+        SortedList_length(&list);
+        pthread_mutex_unlock(&mutex);
+    }
+    else if (opt_sync == 's')
+    {
+        while (__sync_lock_test_and_set(&lock, 1))
+            ;
+        SortedList_length(&list);
+        __sync_lock_release(&lock);
+    }
+    else
+        SortedList_length(&list);
 
     // Look up and delete inserted keys
     SortedListElement_t *to_delete = NULL;
     for (i = 0; i < iterations; ++i)
     {
-        to_delete = SortedList_lookup(&list, (start + i)->key);
-        if (!to_delete)
-            print_error("Key can not be found in list", -1, 2);
-        if (1 == SortedList_delete(to_delete))
-            print_error("Failed to delete element from list", -1, 2);
+        if (opt_sync == 'm')
+        {
+            pthread_mutex_lock(&mutex);
+            to_delete = SortedList_lookup(&list, (start + i)->key);
+            if (!to_delete)
+                print_error("Key can not be found in list", -1, 2);
+            if (1 == SortedList_delete(to_delete))
+                print_error("Failed to delete element from list", -1, 2);
+            pthread_mutex_unlock(&mutex);
+        }
+        else if (opt_sync == 's')
+        {
+            while (__sync_lock_test_and_set(&lock, 1))
+                ;
+            to_delete = SortedList_lookup(&list, (start + i)->key);
+            if (!to_delete)
+                print_error("Key can not be found in list", -1, 2);
+            if (1 == SortedList_delete(to_delete))
+                print_error("Failed to delete element from list", -1, 2);
+            __sync_lock_release(&lock);
+        }
+        else
+        {
+            to_delete = SortedList_lookup(&list, (start + i)->key);
+            if (!to_delete)
+                print_error("Key can not be found in list", -1, 2);
+            if (1 == SortedList_delete(to_delete))
+                print_error("Failed to delete element from list", -1, 2);
+        }
     }
-
-    if (opt_sync == 'm')
-        pthread_mutex_unlock(&mutex);
-    if (opt_sync == 's')
-        __sync_lock_release(&lock);
 
     return NULL;
 }
