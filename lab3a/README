@@ -1,0 +1,15 @@
+NAME: Ashley Zhu, Stephanie Doan
+EMAIL: ashleytz@g.ucla.edu, stephaniekdoan@ucla.edu
+ID: 505308582, 604981556
+
+INCLUDED FILES
+- lab3a.cpp: C++ source code for program that analyzes and summarizes the file system in an image file
+- ext2_fs.h: header file of 2nd extended file system constants and structures
+- Makefile: targets to build program, make tarball, and clean
+- README: this file 
+
+ADDITIONAL SOURCES
+- debugfs(8): https://man7.org/linux/man-pages/man8/debugfs.8.html
+- pread(2): https://man7.org/linux/man-pages/man2/pread.2.html
+- EXT2: http://www.nongnu.org/ext2-doc/ext2.html
+- gmtime: https://www.cplusplus.com/reference/ctime/gmtime/
