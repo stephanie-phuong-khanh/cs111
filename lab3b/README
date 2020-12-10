@@ -1,0 +1,11 @@
+NAME: Ashley Zhu, Stephanie Doan
+EMAIL: ashleytz@g.ucla.edu, stephaniekdoan@ucla.edu
+ID: 505308582, 604981556
+
+INCLUDED FILES
+- lab3b.py - Python script to read a CSV and print out inconsistencies related to inodes, blocks, and directories of an EXT2 filesystem file
+- Makefile: targets to compile the python script, make tarball, and clean
+- README: this file
+
+SOURCES
+- EXT2: http://www.nongnu.org/ext2-doc/ext2.html
