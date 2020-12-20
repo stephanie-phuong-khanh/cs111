@@ -1,0 +1,20 @@
+NAME: Stephanie Doan
+EMAIL: stephaniekdoan@ucla.edu
+ID: 604981556
+
+INCLUDED FILES
+- lab4c_tcp.c: program that builds on Beaglebone to send to and receive from TCP server
+- lab4c_tls.c: program that builds on Beaglebone to send to and receive from TLS server
+- Makefile: target to build programs, make tarball, clean
+- README: this file 
+
+SOURCES 
+- socket(2): https://man7.org/linux/man-pages/man2/socket.2.html
+- ssl_library_init(3): https://linux.die.net/man/3/ssl_library_init
+- openssl_add_ssl_algorithms(3): https://linux.die.net/man/3/openssl_add_ssl_algorithms
+- ssl_load_error_strings(3): https://www.openssl.org/docs/man1.0.2/man3/SSL_load_error_strings.html
+- ssl_set_fd(3): https://linux.die.net/man/3/ssl_set_fd
+- ssl_connect(3): https://www.openssl.org/docs/man1.0.2/man3/SSL_connect.html
+- ssl_read(3): https://linux.die.net/man/3/ssl_read
+- ssl_write(3): https://www.freebsd.org/cgi/man.cgi?query=SSL_write&sektion=3
+- ssl_get_error(3): https://linux.die.net/man/3/ssl_get_error
